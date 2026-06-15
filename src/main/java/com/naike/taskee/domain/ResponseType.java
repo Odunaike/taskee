@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class  ResponseType<T> {
-    private String message;
+    private String status;
     private T data;
 }

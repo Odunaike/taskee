@@ -1,15 +1,21 @@
 package com.naike.taskee.services;
 
+import com.naike.taskee.config.SecurityConfig;
 import com.naike.taskee.domain.dto.LoginDto;
 import com.naike.taskee.domain.dto.SignupDto;
 import com.naike.taskee.domain.entities.UserEntity;
 import com.naike.taskee.repository.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -43,13 +49,20 @@ public class AuthService {
         return userRepository.save(userEntity);
     }
 
-    public void login(LoginDto loginDto) {
+
+    public void login(LoginDto loginDto, HttpServletRequest request) {
         try {
-            authenticationManager.authenticate(
+            Authentication auth =  authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             loginDto.getEmail(),
                             loginDto.getPassword()
                     )
+            );
+            SecurityContextHolder.getContext().setAuthentication(auth);
+            HttpSession session = request.getSession(true);
+            session.setAttribute(
+                    HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+                    SecurityContextHolder.getContext()
             );
         }catch (Exception e){
             throw new BadCredentialsException("Invalid email or password");

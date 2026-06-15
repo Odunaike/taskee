@@ -1,5 +1,6 @@
 package com.naike.taskee.handlers;
 
+import com.naike.taskee.domain.ResponseType;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,17 +24,29 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(map, HttpStatus.BAD_REQUEST);
     }
     @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<String>  handleBadCredentialsException(BadCredentialsException e){
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+    public ResponseEntity<ResponseType<String>>  handleBadCredentialsException(BadCredentialsException e){
+        ResponseType<String> res = new ResponseType<>(
+            "unsuccessful",
+                e.getMessage()
+        );
+        return new ResponseEntity<>(res , HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<String>  handleDataIntegrityViolationException(DataIntegrityViolationException e){
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+    public ResponseEntity<ResponseType<String>>  handleDataIntegrityViolationException(DataIntegrityViolationException e){
+        ResponseType<String> res = new ResponseType<>(
+                "unsuccessful",
+                e.getMessage()
+        );
+        return new ResponseEntity<>(res, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<String>  handleServerException(Exception e){
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<ResponseType<String>>  handleServerException(Exception e){
+        ResponseType<String> res = new ResponseType<>(
+                "unsuccessful",
+                e.getMessage()
+        );
+        return new ResponseEntity<>(res, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

@@ -5,8 +5,10 @@ import com.naike.taskee.domain.dto.LoginDto;
 import com.naike.taskee.domain.dto.SignupDto;
 import com.naike.taskee.domain.dto.UserDto;
 import com.naike.taskee.domain.entities.UserEntity;
-import com.naike.taskee.mapper.Mapper;
+import com.naike.taskee.mapper.impl.AuthMapper;
+import com.naike.taskee.services.UserService;
 import com.naike.taskee.services.AuthService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,10 +20,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController()
 public class AuthController {
     private final AuthService authService;
-    private final Mapper<UserEntity, UserDto> authMapper;
-    public AuthController(AuthService authService,  Mapper<UserEntity, UserDto> authMapper) {
+    private final UserService userService;
+    private final AuthMapper authMapper;
+    public AuthController(AuthService authService, UserService userService,  AuthMapper authMapper) {
         this.authService = authService;
         this.authMapper = authMapper;
+        this.userService = userService;
     }
 
     @GetMapping()
@@ -44,13 +48,16 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ResponseType<String>> login(
-            @RequestBody LoginDto loginDto
+    public ResponseEntity<ResponseType<UserDto>> login(
+            @RequestBody LoginDto loginDto,
+            HttpServletRequest request
     ){
-            authService.login(loginDto);
-            ResponseType<String> response = new ResponseType<>(
+            UserDto userDto = userService.isUserExist(loginDto.getEmail());
+
+            authService.login(loginDto, request);
+            ResponseType<UserDto> response = new ResponseType<UserDto>(
                     "Successful",
-                    "You can now plan with Taskee"
+                    userDto
             );
             return new ResponseEntity<>(response, HttpStatus.OK);
 
